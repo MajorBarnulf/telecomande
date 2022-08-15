@@ -45,14 +45,16 @@
 //! }
 //! ```
 
+mod executor;
 mod handle;
-mod inner;
 mod remote;
 mod traits;
-mod utils;
 
 pub use async_trait::async_trait;
+pub use executor::simple::SimpleExecutor;
 pub use handle::Handle;
 pub use remote::Remote;
-pub use traits::{Manager, Signal};
-pub use utils::spawn;
+pub use traits::{Command, Error, Executor, Processor};
+
+#[cfg(test)]
+mod examples;

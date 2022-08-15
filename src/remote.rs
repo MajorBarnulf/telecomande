@@ -1,28 +1,28 @@
-use tokio::sync::mpsc;
+use tokio::sync::mpsc::{self, error::SendError};
 
-use crate::Manager;
+use crate::traits::Processor;
 
-/// Represents a shareable/clonable remote to a task running a [`crate::traits::Manager`].
-/// Used to send [`crate::traits::Signal`] to that task.
-/// Initially constructed by the [`crate::handle::Handle`] returned on the [`crate::utils::spawn`] of the task.
+/// Represents a shareable/clonable remote to a task running a [`crate::Processor`].
+/// Used to send [`crate::Command`] to that task.
+/// Initially constructed by the [`crate::Handle`] returned on the [`crate::Executor::spawn`] of the task.
 #[derive(Clone)]
-pub struct Remote<M>
+pub struct Remote<P>
 where
-    M: Manager,
+    P: Processor,
 {
-    sender: mpsc::UnboundedSender<M::Signal>,
+    sender: mpsc::UnboundedSender<P::Command>,
 }
 
-impl<M> Remote<M>
+impl<P> Remote<P>
 where
-    M: Manager,
+    P: Processor,
 {
-    pub(crate) fn new(sender: mpsc::UnboundedSender<M::Signal>) -> Self {
+    pub fn new(sender: mpsc::UnboundedSender<P::Command>) -> Self {
         Self { sender }
     }
 
-    /// Main method, sends a [`crate::traits::Signal`] to the running [`crate::traits::Manager`].
-    pub fn send(&self, signal: M::Signal) -> Result<(), mpsc::error::SendError<M::Signal>> {
-        self.sender.send(signal)
+    /// Sends a [`crate::Command`] to the running [`crate::Processor`] for it to handle.
+    pub fn send(&self, command: P::Command) -> Result<(), SendError<P::Command>> {
+        self.sender.send(command)
     }
 }

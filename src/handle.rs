@@ -3,36 +3,41 @@ use tokio::{
     task::{JoinError, JoinHandle},
 };
 
-use crate::{Manager, Remote};
+use crate::{remote::Remote, traits::Processor};
 
-/// A handle to a task running a [`crate::traits::Manager`].
+/// A handle to a task running a [`crate::Processor`].
 /// - Warning: the manager stops operating if this is dropped.
-/// Permit the creation of [`crate::remote::Remote`].
-pub struct Handle<M>
+/// Permit the creation of [`crate::Remote`].
+pub struct Handle<P>
 where
-    M: Manager,
+    P: Processor,
 {
-    task: JoinHandle<()>,
-    sender: mpsc::UnboundedSender<M::Signal>,
+    task: JoinHandle<P::Error>,
+    sender: mpsc::UnboundedSender<P::Command>,
 }
 
-impl<M> Handle<M>
+impl<P> Handle<P>
 where
-    M: Manager,
+    P: Processor,
 {
-    pub(crate) fn new(task: JoinHandle<()>, sender: mpsc::UnboundedSender<M::Signal>) -> Self {
+    pub fn new(task: JoinHandle<P::Error>, sender: mpsc::UnboundedSender<P::Command>) -> Self {
         Self { task, sender }
     }
 
     /// Will wait -possibly endlessly- for the task to finish.
     /// Prevents the task from being dropped before the current thread.
-    pub async fn join(self) -> Result<(), JoinError> {
+    pub async fn join(self) -> Result<P::Error, JoinError> {
         let Self { task, sender: _ } = self;
         task.await
     }
 
-    /// Returns a [`crate::remote::Remote`] able to send [`crate::traits::Signal`] to the [`crate::traits::Manager`] of the running task.
-    pub fn remote(&self) -> Remote<M> {
+    pub fn abort(self) {
+        let Self { task, sender: _ } = self;
+        task.abort();
+    }
+
+    /// Returns a [`crate::Remote`] able to send [`crate::Command`] to the [`crate::Processor`] of the running task.
+    pub fn remote(&self) -> Remote<P> {
         let sender = self.sender.clone();
         Remote::new(sender)
     }

@@ -1,11 +1,11 @@
 [package]
 name = "telecomande"
-version = "0.1.0"
+version = "1.0.0"
 edition = "2021"
-description = "A small crate providing a primitive for the execution of asynchronous tasks by managers through signals."
+description = "A small crate providing a primitive for the execution of asynchronous tasks by processor through commands."
 authors = ["JOLIMAITRE Matthieu <matthieu@imagevo.fr>"]
 license = "MIT"
 
 [dependencies]
-tokio = { version = "1.18.2", features = ["full"] }
-async-trait = "0.1.53"
+tokio = { version = "1.20.1", features = ["full"] }
+async-trait = "0.1.57"
