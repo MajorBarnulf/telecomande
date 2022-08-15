@@ -1,48 +1,59 @@
 # telecomande
 
-A small crate providing a primitive for the execution of asynchronous tasks by managers through signals.
+> note: the typo is voluntary, it makes it easier to find.
 
-## Example:
+## Description
+
+A small crate providing a primitive for the execution of asynchronous tasks by processors through commands.
+
+
+## Example
 
 ```rs
-#[tokio::main]
-async fn main() {
+#[tokio::test]
+async fn example() {
+    use telecomande::Executor;
+
+    // the commands you will send to the processor.
     #[derive(Debug)]
-    pub enum Signal {
+    pub enum Command {
         Greet,
         Say(String),
     }
 
-    pub struct Mgr {
+    // the processor that handles commands.
+    pub struct Proc {
         greeting: String,
     }
-
     #[telecomande::async_trait]
-    impl telecomande::Manager for Mgr {
-        type Signal = Signal;
-        async fn handle(&mut self, signal: Self::Signal) {
-            match signal {
-                Signal::Greet => println!("{}", self.greeting),
-                Signal::Say(text) => println!("{text}"),
-            }
+    impl telecomande::Processor for Proc {
+        type Command = Command;
+        type Error = ();
+        async fn handle(&mut self, command: Self::Command) -> Result<(), ()> {
+            match command {
+                Command::Greet => println!("{}", self.greeting),
+                Command::Say(text) => println!("{text}"),
+            };
+            Ok(())
         }
     }
 
-    let manager = Mgr {
+    // launches an async task to run the processor when it receives commands.
+    let handle = telecomande::SimpleExecutor::new(Proc {
         greeting: "Hello".into(),
-    };
-    let handle = telecomande::spawn(manager);
-    let remote = handle.remote();
-
-    tokio::spawn(async move {
-        remote.send(Signal::Greet).unwrap();
-        remote.send(Signal::Say("telecomande".into())).unwrap();
     })
-    .await
-    .unwrap();
-    
-    //   out:
+    .spawn();
+
+    // remotes can be clonned and passed between threads.
+    let remote = handle.remote();
+    remote.send(Command::Greet).unwrap();
+    remote.send(Command::Say("telecomande".into())).unwrap();
+
+    // output:
     // Hello
     // telecomande
+
+    tokio::time::sleep(std::time::Duration::from_millis(50)).await;
+    drop(handle);
 }
 ```
