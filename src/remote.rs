@@ -5,7 +5,7 @@ use crate::traits::Processor;
 /// Represents a shareable/clonable remote to a task running a [`crate::Processor`].
 /// Used to send [`crate::Command`] to that task.
 /// Initially constructed by the [`crate::Handle`] returned on the [`crate::Executor::spawn`] of the task.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Remote<P>
 where
     P: Processor,

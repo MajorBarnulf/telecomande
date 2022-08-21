@@ -5,6 +5,7 @@ use crate::traits::Processor;
 use super::Executor;
 
 /// Simple implementation of [`crate::Executor`], process incomming [`crate::Command`]s one by one.
+#[derive(Debug)]
 pub struct SimpleExecutor<P>
 where
     P: Processor,
