@@ -8,5 +8,5 @@ license = "MIT"
 repository = "https://github.com/MajorBarnulf/telecomande/"
 
 [dependencies]
-tokio = { version = "1.20.1", features = ["full"] }
-async-trait = "0.1.57"
+tokio = { version = "1.20", features = ["full"] }
+async-trait = "0.1"
