@@ -1,6 +1,6 @@
 [package]
 name = "telecomande"
-version = "1.0.1"
+version = "1.2.0"
 edition = "2021"
 description = "A small crate providing a primitive for the execution of asynchronous tasks by processor through commands."
 authors = ["JOLIMAITRE Matthieu <matthieu@imagevo.fr>"]

@@ -35,3 +35,12 @@ where
         }
     }
 }
+
+impl<P> From<P> for SimpleExecutor<P>
+where
+    P: Processor,
+{
+    fn from(input: P) -> Self {
+        Self::new(input)
+    }
+}
